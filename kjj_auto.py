@@ -179,7 +179,8 @@ class kijiji():
         replies = int(reply_element.text)
         if replies > 0:
             print('\nYou have {} replies in your inbox. Ad not deleted.'.format(replies))
-            return
+            print('Press "ctrl + c" to quit the program.')
+            input('Press "Enter" to continue the loop and delete the ad: ')
         
         # click delete ad
         self.click_by_text(self.kjj.find_elements_by_tag_name,'a','Delete Ad')

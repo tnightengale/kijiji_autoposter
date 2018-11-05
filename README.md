@@ -34,7 +34,7 @@ The program will run a loop that:
 - Waits 24hrs
 - Deletes the ad and then waits 10 minutes before repeating
 
-If there are replies to the ad, the program will not delete it and will instead print that it has detected messages.
+If there are replies to the ad, the program will not delete it and will instead print that it has detected messages. The loop will pause and prompt the user for input at the terminal to continue.
 
 
 
