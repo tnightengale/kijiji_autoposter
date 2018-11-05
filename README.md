@@ -27,12 +27,12 @@ This python script can be used to manage the automatic reposting of Kjiji ads.
 
 4. Open the file `environvars` in textedit and enter your kijiji email and password. In terminal run `$ source environvars` to create environment variables with your email and password. 
 
-5. Run the script from terminal `python kjj_auto.py` You will be asked to input an upper and lower price bound. The program reposts every 24hrs. Each time it reposts, it lowers the price by $10. The initial price is the upper bound. If the lower bound is reached, it reposts at the price of the lower bound.
+5. Run the script from terminal `$ python kjj_auto.py` You will be asked to input an upper and lower price bound. The program reposts every 24hrs. Each time it reposts, it lowers the price by $10. The initial price is the upper bound. If the lower bound is reached, it reposts at the price of the lower bound.
 
 The program will run a loop that:
-	- Opens a chrome window and posts the ad, the closes
-	- Waits 24hrs
-	- Deletes the ad and then waits 10 minutes before repeating
+- Opens a chrome window and posts the ad, the closes
+- Waits 24hrs
+- Deletes the ad and then waits 10 minutes before repeating
 
 If there are replies to the ad, the program will not delete it and will instead print that it has detected messages.
 
