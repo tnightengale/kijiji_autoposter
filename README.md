@@ -12,6 +12,7 @@ This python script can be used to manage the automatic reposting of Kjiji ads.
 		|
 		|----kjj_auto.py
 		|----description.txt
+		|----titles.txt
 		|----environvars
 		|----chromedriver
 		|----images
