@@ -20,9 +20,34 @@ class kijiji():
         self.user = os.environ['KIJIJI_EMAIL']
         self.password = os.environ['KIJIJI_PASS']
         self.create_title_list()
-        self.selling_price = '600.00'
+        self.create_price_schedule()
         self.description = open('description.txt','r').read()
+        print('Titles list is {}'.format(self.titles))
+        self.current_ad_title = None
+        self.current_ad_price = None
+        
+    def create_price_schedule(self):
+        '''
+        Asks for a lower an upper bound and 
+        generates a price schedule to cycle through.
+        '''
+        upper = int(input('Enter your upper price bound: '))
+        lower = int(input('Enter your lower price bound: '))
+        self.price_schedule = list(range(lower,upper,10))
     
+    def schedule_choice(self):
+        '''
+        Returns decending values from the price_schedule
+        attribute until the lower bound is hit and then
+        only return the lower bound.
+        '''
+        if len(self.price_schedule) == 1:
+            current_price = self.price_schedule[0]
+        else:
+            current_price = self.price_schedule.pop()
+        
+        return current_price
+        
     def create_title_list(self):
         '''
         Reads the titles.txt file in the
@@ -42,10 +67,10 @@ class kijiji():
     
     def random_title(self):
         '''
-        Returns a random titles for the created
+        Returns a random title from the created
         list of titles.
         '''
-        return self.titles[random.randint(0,len(self.titles))]
+        return self.titles[random.randint(0,len(self.titles)-1)]
         
         
     def next_url(self,new_url):
@@ -99,7 +124,8 @@ class kijiji():
         
         # randomly choose ad title and send keys
         title = self.kjj.find_element_by_id('AdTitleForm')
-        title.send_keys(self.random_title())
+        self.current_ad_title = self.random_title()
+        title.send_keys(self.current_ad_title)
         
         self.click_by_text(self.kjj.find_elements_by_tag_name,'button','Next')
         
@@ -107,9 +133,10 @@ class kijiji():
         categories = self.kjj.find_elements_by_tag_name('button')
         self.next_click(categories[1])
         
-        # enter price
+        # choose and enter ad price
         price = self.kjj.find_element_by_id('PriceAmount')
-        price.send_keys(self.selling_price)
+        self.current_ad_price = self.schedule_choice()
+        price.send_keys(self.current_ad_price)
         
         # enter description
         desc = self.kjj.find_element_by_tag_name('textarea')
@@ -126,10 +153,17 @@ class kijiji():
         for pic in image_list:
             upload.send_keys(os.path.abspath('images')+'/'+pic)
         
+        # wait for pics to load
+        time.sleep(20)
+        
         # click submit
         self.click_by_text(self.kjj.find_elements_by_tag_name,'button','Post Your Ad')
         
-        print('Ad posted successfully.')
+        print(
+                'Ad posted successfully.',
+                '\nCurrent title is {}.'.format(self.current_ad_title),
+                '\nCurrent price is {}.'.format(self.current_ad_price)
+                )
             
     
     def delete_ad(self):
@@ -138,7 +172,7 @@ class kijiji():
         self.kjj.get('https://www.kijiji.ca/m-my-ads/active/1')
         
         # go into ad
-        self.click_by_text(self.kjj.find_elements_by_tag_name,'a',self.ad_title)
+        self.click_by_text(self.kjj.find_elements_by_tag_name,'a',self.current_ad_title)
         
         # check for replies
         reply_element = self.kjj.find_element_by_class_name('ad-replies')
@@ -177,26 +211,20 @@ class kijiji():
         self.kjj.close()
         print('Browser closed')
 
-def dt_to_str(date_time_object):
+def d_str(date_time_object):
     '''
-    Takes in a date time object and outputs
-    two strings:
-        
-        "yyyy/mm/dd"
-        "hh:mm.ss"
+    Takes in a datetime object and outputs "yyyy/mm/dd hh:mm.ss".
     '''
     dt = date_time_object
-    a = '{}/{}/{}'.format(dt.year,dt.month,dt.day)
-    b = '{}:{}.{}'.format(dt.hour,dt.minute,dt.second)
-    return a, b
+    return dt.strftime('%Y/%m/%d %H:%M:%S')
 
 def main():
+    browser = kijiji()
+    
     while True:
-        date_str, time_str = dt_to_str(datetime.datetime.now())
         
-        print('The current time is {} on {}.'.format(time_str,date_str))
-        
-        browser = kijiji()
+        time_stamp = d_str(datetime.datetime.now())
+        print('The current time is {}.'.format(time_stamp))
         
         browser.access_kijiji()
         
@@ -204,24 +232,30 @@ def main():
         
         browser.close()
         
-        # wait 20hrs
-        wait_time = (60*60*20)
+        # wait 24hrs
+        wait_time = datetime.timedelta(days=1)
         
-        sleep_time = time.time() + wait_time
-        date_str, time_str = dt_to_str(datetime.datetime.fromtimestamp(sleep_time))
-        print('Sleeping loop till {} on {}.'.format(time_str,date_str))
-        time.sleep(wait_time)
+        sleep_time = datetime.datetime.now() + wait_time
+        
+        sleep_time_stamp = d_str(sleep_time)
+        print('Sleeping loop till {}.'.format(sleep_time_stamp))
+       
+        while datetime.datetime.now() < sleep_time:
+            time.sleep(1)
         
         # delete ad
-        print('Deleting ad.')
+        print('Deleting ad...')
         browser.access_kijiji()
         
         browser.delete_ad()
         
         browser.close()
         
-        # sleep 10 minutes
-        time.sleep(60*10)
+        # sleep 60 seconds
+        print('sleeping 60 seconds before reposting...')
+        time.sleep(60)
+        
+        
     
 if __name__ == '__main__':
     main()
