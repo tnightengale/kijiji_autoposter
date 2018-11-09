@@ -11,6 +11,7 @@ This python script can be used to manage the automatic reposting of Kjiji ads.
 	~./cloned_dir
 		|
 		|----kjj_auto.py
+		|----requirements.txt
 		|----description.txt
 		|----titles.txt
 		|----environvars
