@@ -7,7 +7,9 @@ Created on Fri Nov  2 14:17:27 2018
 """
 
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import os
+import sys
 import time
 import datetime
 import random
@@ -25,6 +27,12 @@ class kijiji():
         print('Titles list is {}'.format(self.titles))
         self.current_ad_title = None
         self.current_ad_price = None
+        
+        # run headless browser
+        self.headless = Options()
+        self.headless.add_argument("--headless")
+        self.headless.add_argument("---info-bars")
+        self.headless.add_argument("--use-fake-ui-for-media-stream")
         
     def create_price_schedule(self):
         '''
@@ -101,10 +109,8 @@ class kijiji():
         
         chrome_path = os.path.abspath('chromedriver')
         
-        # move to home to access chromedriver
-        #os.chdir('/Users/tnightengale')
-        self.kjj = webdriver.Chrome(chrome_path)
-        #os.chdir(self.current_dir)
+        # create headless driver
+        self.kjj = webdriver.Chrome(chrome_path, options=self.headless)
     
         # go to kijiji
         self.next_url('https://www.kijiji.ca/')
@@ -169,7 +175,7 @@ class kijiji():
     def delete_ad(self):
         
         # go to ad page
-        self.kjj.get('https://www.kijiji.ca/m-my-ads/active/1')
+        self.next_url('https://www.kijiji.ca/m-my-ads/active/1')
         
         # go into ad
         self.click_by_text(self.kjj.find_elements_by_tag_name,'a',self.current_ad_title)
@@ -177,10 +183,11 @@ class kijiji():
         # check for replies
         reply_element = self.kjj.find_element_by_class_name('ad-replies')
         replies = int(reply_element.text)
+        print('\nCurrent number of replies is {}.'.format(replies))
         if replies > 0:
             print('\nYou have {} replies in your inbox. Ad not deleted.'.format(replies))
-            print('Press "ctrl + c" to quit the program.')
-            input('Press "Enter" to continue the loop and delete the ad: ')
+            print('\nPress "ctrl + c" to quit the program.')
+            input('\nPress "Enter" to continue the loop and delete the ad: ')
         
         # click delete ad
         self.click_by_text(self.kjj.find_elements_by_tag_name,'a','Delete Ad')
@@ -219,13 +226,14 @@ def d_str(date_time_object):
     dt = date_time_object
     return dt.strftime('%Y/%m/%d %H:%M:%S')
 
-def main():
+def main(wait_hours):
     browser = kijiji()
     
     while True:
         
+        # post ad
         time_stamp = d_str(datetime.datetime.now())
-        print('The current time is {}.'.format(time_stamp))
+        print('Loop start. The current time is {}.'.format(time_stamp))
         
         browser.access_kijiji()
         
@@ -233,15 +241,20 @@ def main():
         
         browser.close()
         
-        # wait 24hrs
-        wait_time = datetime.timedelta(days=1)
-        
+        # pause if current hour is between 24 and 6
+        #print('Checking if time is between 12am and 6am.')
+        #dt = datetime.datetime.now()
+        #seven_am = datetime.datetime(dt.year,dt.month,dt.day,7,0)
+        #night_time = dt.hour in [24,1,2,3,4,5,6]
+            
+        # wait 4hrs or hours arg
+        wait_time = datetime.timedelta(hours=wait_hours)
         sleep_time = datetime.datetime.now() + wait_time
         
-        sleep_time_stamp = d_str(sleep_time)
+        # wait till 
+        sleep_time_stamp = d_str(sleep_time) #d_str(max(seven_am,sleep_time))
         print('Sleeping loop till {}.'.format(sleep_time_stamp))
-       
-        while datetime.datetime.now() < sleep_time:
+        while datetime.datetime.now() < sleep_time: #or night_time:
             time.sleep(1)
         
         # delete ad
@@ -259,7 +272,11 @@ def main():
         
     
 if __name__ == '__main__':
-    main()
+    try:
+        hours_option = int(sys.argv[1])
+    except:
+        hours_option = 4
+    main(hours_option)
         
         
         
