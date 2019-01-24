@@ -35,7 +35,7 @@ This python script can be used to manage the automatic reposting of Kjiji ads.
 Upon running the script you will be asked to input an upper and lower price bound. The program reposts every `h` hours. Each time it reposts, it lowers the price by $10. The initial price is the upper bound. If the lower bound is reached, it reposts at the price of the lower bound.
 
 The program will run a loop that:
-- Opens a chrome window and posts the ad, the closes
+- Opens a Chrome window. Posts the ad. Closes the Chrome window. (Obviously you will need Chrome installed)
 - Waits `h` hours (4hrs is default)
 - Deletes the ad and then waits 10 minutes before repeating
 
